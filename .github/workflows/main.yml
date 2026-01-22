@@ -1,31 +1,35 @@
-name: 定期更新 IP 地址
+name: Update IP List
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 */6 * * *' # Run every 6 hours
+  workflow_dispatch:
 
 jobs:
   update-ip:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: 设置 Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
-      # 更新此步骤以安装所有需要的库
-      - name: 安装依赖
-        run: pip install requests beautifulsoup4 lxml
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: 运行脚本获取 IP
+      - name: Fetch and update IPs
         run: python main.py
 
-      - name: 提交并推送文件
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "ci: 自动更新 IP 地址"
-          file_pattern: ip.txt
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ip.txt
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update IP list" && git push)
