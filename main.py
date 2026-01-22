@@ -2,6 +2,15 @@ import requests
 import re
 import json
 
+# Simple mapping for common country codes to Chinese names to maintain the requested format
+COUNTRY_MAP = {
+    'US': '美国', 'CA': '加拿大', 'CN': '中国', 'HK': '香港', 'TW': '台湾',
+    'JP': '日本', 'KR': '韩国', 'SG': '新加坡', 'GB': '英国', 'DE': '德国',
+    'FR': '法国', 'NL': '荷兰', 'RU': '俄罗斯', 'IN': '印度', 'AU': '澳大利亚',
+    'MY': '马来西亚', 'TH': '泰国', 'VN': '越南', 'ID': '印度尼西亚',
+    'BR': '巴西', 'IT': '意大利', 'ES': '西班牙'
+}
+
 def fetch_ips_from_url(url):
     try:
         response = requests.get(url, timeout=10)
@@ -36,30 +45,36 @@ def fetch_and_save_ips():
     unique_ips = list(all_ips)
     print(f"Total unique IPs to process: {len(unique_ips)}")
 
-    # GeoIP Lookup using ip-api.com (Batch)
-    # The API supports up to 100 IPs per batch. We need to chunk if > 100.
-    # User examples show ~38 per file, so ~76 total, likely < 100.
-    # But for safety, let's process in chunks of 100.
+    # GeoIP Lookup using ipinfo.io (Batch)
+    # Token provided: 6f75ff6b8f013b
+    # Batch endpoint: https://ipinfo.io/batch?token=...
+    # Supports up to 1000 IPs in a single batch? 
+    # Standard limitation is usually higher than ip-api.com. Let's stick to chunks of 100 for safety.
     
     formatted_ips = []
     chunk_size = 100
+    token = "6f75ff6b8f013b"
     
     for i in range(0, len(unique_ips), chunk_size):
         chunk = unique_ips[i:i + chunk_size]
-        api_url = "http://ip-api.com/batch?fields=query,countryCode,country&lang=zh-CN"
+        api_url = f"https://ipinfo.io/batch?token={token}"
         
         try:
-            geo_response = requests.post(api_url, json=chunk, timeout=20)
-            geo_response.raise_for_status()
-            geo_data = geo_response.json()
+            # ipinfo batch expects a list of IPs or a dict of filtered lookups like {"path": "ip"}
+            # It also accepts a simple list of strings for full details.
+            response = requests.post(api_url, json=chunk, timeout=20)
+            response.raise_for_status()
+            geo_data = response.json()
             
-            # Map IP to Geo info
-            ip_map = {item['query']: item for item in geo_data}
+            # geo_data is a dict: {"8.8.8.8": {...info...}}
             
             for ip in chunk:
-                geo = ip_map.get(ip)
-                if geo and 'countryCode' in geo and 'country' in geo:
-                    location = f"{geo['countryCode']}{geo['country']}"
+                info = geo_data.get(ip)
+                if info and 'country' in info:
+                    cc = info['country']
+                    # Map code to Name if possible
+                    cn_name = COUNTRY_MAP.get(cc, '')
+                    location = f"{cc}{cn_name}"
                     formatted_ips.append(f"{ip}:443#{location}")
                 else:
                     formatted_ips.append(f"{ip}:443#Unknown")
