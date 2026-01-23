@@ -4,7 +4,7 @@ import json
 
 def fetch_ips_from_url(url):
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=50)
         response.raise_for_status()
         content = response.text
         # Use regex to capture both IPv4 and IPv6 addresses
@@ -28,8 +28,8 @@ def fetch_and_save_ips():
     urls = [
         "https://ip.164746.xyz/ipTop10.html",
         "https://raw.githubusercontent.com/rong2er/IP666/refs/heads/main/Ranking.txt",
-        "https://ipdb.api.030101.xyz/?type=bestcf&country=true",
-        "https://api.uouin.com/cloudflare.html"
+        "https://ipdb.api.030101.xyz/?type=bestcf&country=true"
+       # "https://api.uouin.com/cloudflare.html"
     ]
     
     all_ips = set()
