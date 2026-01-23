@@ -52,7 +52,7 @@ def fetch_and_save_ips():
     formatted_ips = []
     
     for ip in unique_ips:
-        api_url = f"http://ip-api.com/json/{ip}?fields=countryCode,country&lang=zh-CN"
+        api_url = f"http://ip-api.com/json/{ip}"
         
         try:
             geo_response = requests.get(api_url, timeout=50)
