@@ -27,9 +27,11 @@ def fetch_ips_from_url(url):
 def fetch_and_save_ips():
     urls = [
         "https://ip.164746.xyz/ipTop10.html",
-        "https://raw.githubusercontent.com/rong2er/IP666/refs/heads/main/Ranking.txt",
-        "https://ipdb.api.030101.xyz/?type=bestcf&country=true"
-       # "https://api.uouin.com/cloudflare.html"
+        "https://api.uouin.com/cloudflare.html"
+      
+      
+         # "https://raw.githubusercontent.com/rong2er/IP666/refs/heads/main/Ranking.txt",
+          #"https://ipdb.api.030101.xyz/?type=bestcf&country=true"
     ]
     
     all_ips = set()
