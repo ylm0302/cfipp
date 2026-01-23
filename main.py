@@ -55,7 +55,7 @@ def fetch_and_save_ips():
         api_url = f"http://ip-api.com/json/{ip}?fields=countryCode,country&lang=zh-CN"
         
         try:
-            geo_response = requests.get(api_url, timeout=10)
+            geo_response = requests.get(api_url, timeout=50)
             geo_response.raise_for_status()
             geo_data = geo_response.json()
             
